@@ -1,0 +1,67 @@
+{
+  "name": "unshaped",
+  "version": "0.1.0",
+  "main": "./lib/es/index.js",
+  "module": "./lib/es/index.js",
+  "description": "Using react hooks and feeling shapeless",
+  "license": "MIT",
+  "private": false,
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "scripts": {
+    "start": "parcel ./example/index.html",
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint '{src,mock,config}/**/*.{ts,tsx}'",
+    "lint:fix": "eslint --fix '{src,mock,config}/**/*.{ts,tsx}'",
+    "umd": "rollup --config rollup.config.js",
+    "release": "standard-version",
+    "type": "tsc --project tsconfig.json --skipLibCheck --noEmit"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run type && lint-staged"
+    }
+  },
+  "files": [
+    "lib"
+  ],
+  "devDependencies": {
+    "@testing-library/jest-dom": "^4.0.0",
+    "@testing-library/react": "^9.3.0",
+    "@types/jest": "^24.0.18",
+    "@types/node": "^10.12.24",
+    "@types/react": "^16.8.0",
+    "@types/react-dom": "^16.8.0",
+    "@types/react-test-renderer": "^16.8.0",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
+    "@typescript-eslint/parser": "^3.7.0",
+    "eslint": "^7.5.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-config-react": "^1.1.7",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "^7.20.3",
+    "husky": "^3.0.9",
+    "jest": "^24.1.0",
+    "lint-staged": "^10.2.11",
+    "parcel": "^1.12.4",
+    "prettier": "^1.19.1",
+    "pretty-quick": "^2.0.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "react-test-renderer": "^16.8.0",
+    "rollup": "^1.21.4",
+    "standard-version": "^8.0.2",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {},
+  "lint-staged": {
+    "*.{less,md,json}": [
+      "prettier --write"
+    ],
+    "*.ts?(x)": [
+      "npm run lint:fix"
+    ]
+  }
+}

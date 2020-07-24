@@ -1,0 +1,5 @@
+dist
+lib
+site
+coverage
+node_modules
