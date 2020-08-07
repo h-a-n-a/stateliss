@@ -1,40 +1,81 @@
-import { useContext, useEffect, useRef, useState } from 'react'
-import { Store, StoreValueType } from './types'
+import { useContext, useEffect, useRef, useState, Context } from 'react'
+import { Store, StorePropsType, StoreValueType } from './types'
 import { EMPTY } from './constants'
 import { areDepsEqual } from './utils'
+import Container from '@/container'
+import { Simulate } from 'react-dom/test-utils'
+import select = Simulate.select
 
 type Deps<T> = (value: T) => unknown[]
 
-function useStore<T extends Store<any, any>, U>(
+// function useAsyncStore<T extends Record<string, Store<any, any>>, U>(
+//   store: T,
+//   depFn?: Deps<StoreValueType<T>>
+// ): StoreValueType<T>
+// function useAsyncStore<T extends Store<any, any>, U>(
+//   store: T,
+//   depFn?: Deps<StoreValueType<T>>
+// ): StoreValueType<T>
+function useAsyncStore<
+  T extends Store<any, any> | Record<P, Store<any, any>>,
+  U,
+  P extends string
+>(
   store: T,
-  depFn?: Deps<StoreValueType<T>>
-) {
-  const container = useContext(store.Context)
-  if (container === EMPTY) {
-    throw Error('`useStore` should be wrapped in a `Store.Provider`.')
+  options?: {
+    depFn?: Deps<StoreValueType<T>>
+    selector?: (stores: T) => T[keyof T][]
   }
+): StoreValueType<T> {
+  if ('Provider' in store && 'Context' in store) {
+    const container = useContext(
+      (store as Store<StorePropsType<T>, StoreValueType<T>>).Context as Context<
+        Container<U> | typeof EMPTY
+      >
+    )
+    if (container === EMPTY) {
+      throw Error(
+        '`useAsyncStore` should be wrapped in an `AsyncStore.Provider`.'
+      )
+    }
 
-  const [state, setState] = useState<StoreValueType<T>>(container.data)
-  const oldDepsRef = useRef<unknown[]>([])
+    const [state, setState] = useState<StoreValueType<T>>(
+      container.data as StoreValueType<T>
+    )
 
-  useEffect(() => {
-    const subscriber = () => {
-      if (!depFn) {
-        setState(container.data)
-      } else {
-        const oldDeps = oldDepsRef.current
-        const newDeps = depFn(container.data)
-        if (!areDepsEqual(oldDeps, newDeps)) setState(container.data)
-        oldDepsRef.current = newDeps
+    const oldDepsRef = useRef<unknown[]>([])
+
+    useEffect(() => {
+      const subscriber = () => {
+        if (!options?.depFn) {
+          setState(container.data as StoreValueType<T>)
+        } else {
+          const oldDeps = oldDepsRef.current
+          const newDeps = options?.depFn(container.data as StoreValueType<T>)
+          if (!areDepsEqual(oldDeps, newDeps))
+            setState(container.data as StoreValueType<T>)
+          oldDepsRef.current = newDeps
+        }
       }
-    }
-    container.subscribers.add(subscriber)
-    return () => {
-      container.subscribers.delete(subscriber)
-    }
-  }, [])
+      container.subscribers.add(subscriber)
+      return () => {
+        container.subscribers.delete(subscriber)
+      }
+    }, [])
 
-  return state
+    return state
+  } else {
+    const storesToUse = {} as Record<P, Store<any, any>>
+    const selectedStores = options?.selector?.(store) ?? Object.values(store)
+
+    const storeNames = Object.keys(store)
+    const storeValues = Object.values(store)
+
+    for (const selectedStore of selectedStores) {
+      const index = storeValues.indexOf(selectedStore)
+      storesToUse[storeNames[index] as P] = storeValues[index]
+    }
+  }
 }
 
-export default useStore
+export default useAsyncStore
