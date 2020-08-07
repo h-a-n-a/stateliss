@@ -50,21 +50,21 @@ function AsyncExecutor<T, U>({
       initialized.current = true
       return
     }
-    // eslint-disable-next-line
-    (async () => {
-      resetStatus()
-      try {
-        setLoading(true)
-        const res = await asyncFn({ ...defaultAsyncParams, ...asyncParams })
+
+    resetStatus()
+    setLoading(true)
+    asyncFn({ ...defaultAsyncParams, ...asyncParams })
+      .then((res) => {
         setResult(res)
         setIsFulfilled(true)
-      } catch (e) {
-        setResult(e)
-        setIsRejected(true)
-      } finally {
+      })
+      .catch((err) => {
+        setResult(err)
+        setIsFulfilled(true)
+      })
+      .finally(() => {
         setLoading(false)
-      }
-    })()
+      })
 
     return () => {
       setLoading(false)
