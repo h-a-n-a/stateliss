@@ -10,15 +10,10 @@ import Container from './container'
 import AsyncExecutor, { AsyncData } from './AsyncExecutor'
 import { EMPTY } from './constants'
 import { Store } from './types'
+import { composeComponents } from './utils'
 
 export type AsyncFn<T extends Record<string, any>, U> = (props: T) => Promise<U>
 
-function createAsyncStore<T, U, P extends string>(
-  asyncFn: Record<P, AsyncFn<T, U>>
-): Record<P, Store<T, AsyncData<T, U>>>
-function createAsyncStore<T, U, P extends string>(
-  asyncFn: AsyncFn<T, U>
-): Store<T, AsyncData<T, U>>
 function createAsyncStore<T, U, P extends string>(
   asyncFn: AsyncFn<T, U> | Record<P, AsyncFn<T, U>>
 ): Store<T, AsyncData<T, U>> | Record<P, Store<T, AsyncData<T, U>>> {
@@ -30,16 +25,36 @@ function createAsyncStore<T, U, P extends string>(
         '`Provider` or `Context` is a pre-defined keyword in unshaped. Use other property name instead.'
       )
     }
-    return createStores(asyncFn)
+    // { Provider: <NestedProviders>{children}</NestedProviders>, Context: [Context1, Context2, Context3] }
+    // return createStores(asyncFn)
   }
 
   function createStores(asyncFns: Record<P, AsyncFn<T, U>>) {
-    const stores = {} as Record<P, Store<T, AsyncData<T, U>>>
+    const storeStack: { name: P; store: ReturnType<typeof createStore> }[] = []
 
     for (const asyncFnName in asyncFns) {
-      stores[asyncFnName] = createStore(asyncFns[asyncFnName])
+      storeStack.push({
+        name: asyncFnName,
+        store: createStore(asyncFns[asyncFnName])
+      })
     }
-    return stores
+
+    const Provider: FC<PropsWithChildren<{
+      providerProps: Record<P, any>
+    }>> = ({ providerProps, children }) => {
+      const components = storeStack.reduce((components, currentComponent) => {
+        return components.concat({
+          component: currentComponent.store.Provider,
+          props: providerProps[currentComponent.name]
+        })
+      }, [])
+      return composeComponents(components, children)
+    }
+
+    return {
+      Provider,
+      Context: storeStack.filter((stack) => stack.store.Context)
+    }
   }
 
   function createStore(asyncFn: AsyncFn<T, U>) {

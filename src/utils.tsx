@@ -1,5 +1,11 @@
 import { ExecutorProps } from './Executor'
 import { AsyncExecutorProps } from './AsyncExecutor'
+import React, {
+  FC,
+  FunctionComponentElement,
+  PropsWithChildren,
+  ReactNode
+} from 'react'
 
 export const arePropsEqual = (
   prevProps: ExecutorProps<any, any> | AsyncExecutorProps<any, any>,
@@ -37,4 +43,44 @@ export function areDepsEqual(oldDeps: unknown[], newDeps: unknown[]) {
     }
   }
   return true
+}
+
+interface ComponentWithProps {
+  component: FC<PropsWithChildren<any>>
+  props: Record<string, any>
+}
+
+// [ComponentA, ComponentB, ComponentC] => <ComponentA><ComponentB><ComponentC></ComponentC></ComponentB></ComponentA>
+export function composeComponents(
+  components: ComponentWithProps[],
+  children?: ReactNode
+) {
+  return createComponentTree(components, children)
+}
+
+function createComponentTree<T extends ReactNode>(
+  components: ComponentWithProps[],
+  lastChildren?: T,
+  index = 0
+): FunctionComponentElement<{
+  lastChildren?: T
+}> {
+  const isLastNode = index === components.length - 1
+  const internalComponentState = components[index]
+  const Component = internalComponentState.component
+  const componentProps = internalComponentState.props
+
+  if (isLastNode) {
+    // eslint-disable-next-line react/no-children-prop
+    return React.createElement(Component, {
+      ...(componentProps ?? {}),
+      children: lastChildren
+    })
+  } else {
+    return React.createElement(
+      Component,
+      {},
+      createComponentTree(components, lastChildren, ++index)
+    )
+  }
 }

@@ -34,7 +34,7 @@
     "@typescript-eslint/no-empty-function": 0,
     "@typescript-eslint/explicit-function-return-type": 0,
     "@typescript-eslint/no-non-null-assertion": 0,
-    "no-shadow": 1,
+    "no-shadow": 0,
     "prefer-const": 0,
     "jsx-quotes": 0,
     "react/prop-types": 0,
