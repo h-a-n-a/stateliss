@@ -4,19 +4,20 @@ import React, {
   useState,
   useCallback,
   createContext,
-  PropsWithChildren
+  PropsWithChildren,
+  Context
 } from 'react'
 import Container from './container'
 import AsyncExecutor, { AsyncData } from './AsyncExecutor'
 import { EMPTY } from './constants'
-import { Store } from './types'
+import { Store, ComposedStore, ComposedStoreProps, ContextType } from './types'
 import { composeComponents } from './utils'
 
 export type AsyncFn<T extends Record<string, any>, U> = (props: T) => Promise<U>
 
 function createAsyncStore<T, U, P extends string>(
   asyncFn: AsyncFn<T, U> | Record<P, AsyncFn<T, U>>
-): Store<T, AsyncData<T, U>> | Record<P, Store<T, AsyncData<T, U>>> {
+): Store<T, AsyncData<T, U>> | ComposedStore<Record<P, T>, AsyncData<T, U>, P> {
   if (typeof asyncFn === 'function') {
     return createStore(asyncFn)
   } else if (asyncFn && typeof asyncFn === 'object') {
@@ -26,7 +27,7 @@ function createAsyncStore<T, U, P extends string>(
       )
     }
     // { Provider: <NestedProviders>{children}</NestedProviders>, Context: [Context1, Context2, Context3] }
-    // return createStores(asyncFn)
+    return createStores(asyncFn)
   }
 
   function createStores(asyncFns: Record<P, AsyncFn<T, U>>) {
@@ -39,9 +40,10 @@ function createAsyncStore<T, U, P extends string>(
       })
     }
 
-    const Provider: FC<PropsWithChildren<{
-      providerProps: Record<P, any>
-    }>> = ({ providerProps, children }) => {
+    const Provider: FC<PropsWithChildren<ComposedStoreProps<Record<P, T>>>> = ({
+      providerProps,
+      children
+    }) => {
       const components = storeStack.reduce((components, currentComponent) => {
         return components.concat({
           component: currentComponent.store.Provider,
@@ -53,7 +55,13 @@ function createAsyncStore<T, U, P extends string>(
 
     return {
       Provider,
-      Context: storeStack.filter((stack) => stack.store.Context)
+      keyToContext: storeStack.reduce(
+        (components, currentComponent) => ({
+          ...components,
+          [currentComponent.name]: currentComponent.store.Context
+        }),
+        {} as Record<P, ContextType<AsyncData<T, U>>>
+      )
     }
   }
 

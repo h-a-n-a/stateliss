@@ -1,11 +1,12 @@
-import { ExecutorProps } from './Executor'
-import { AsyncExecutorProps } from './AsyncExecutor'
 import React, {
   FC,
   FunctionComponentElement,
   PropsWithChildren,
   ReactNode
 } from 'react'
+import { ExecutorProps } from './Executor'
+import { AsyncExecutorProps } from './AsyncExecutor'
+import { ComposedStore, Store } from './types'
 
 export const arePropsEqual = (
   prevProps: ExecutorProps<any, any> | AsyncExecutorProps<any, any>,
@@ -83,4 +84,14 @@ function createComponentTree<T extends ReactNode>(
       createComponentTree(components, lastChildren, ++index)
     )
   }
+}
+
+export function isComposedStore(
+  store: unknown
+): store is ComposedStore<any, any, any> {
+  return store && typeof store === 'object' && 'keyToContext' in store
+}
+
+export function isStore(store: unknown): store is Store<any, any> {
+  return store && typeof store === 'object' && 'Context' in store
 }
