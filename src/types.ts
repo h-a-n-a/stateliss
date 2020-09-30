@@ -43,11 +43,24 @@ export type ComposedValueType<T> = T extends ComposedStore<
   ? Value
   : unknown
 
-export type ComposedContextType<T> = T extends {
+export type ComposedKeyToContextType<T> = T extends {
   Provider: any
-  keyToContext: infer Context
+  keyToContext: infer KeyToContext
 }
-  ? Context
+  ? KeyToContext
+  : unknown
+
+export type ComposedKeyValueType<T> = T extends {
+  Provider: any
+  keyToContext: infer KeyToContext
+}
+  ? {
+      [K in keyof KeyToContext]: KeyToContext[K] extends ContextType<
+        infer Value
+      >
+        ? Value
+        : unknown
+    }
   : unknown
 
 export type ComposedKeyType<T> = T extends ComposedStore<any, any, infer Key>

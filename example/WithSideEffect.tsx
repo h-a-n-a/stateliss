@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { createAsyncStore, useStore } from '../src/index'
+import { createAsyncStore, useAsyncStore } from '../src/index'
 
 const getSomeoneRandom = async ({ seed }: { seed: number }) => {
   console.log('Requested With Seed:', seed)
@@ -15,7 +15,7 @@ const getSomeoneRandom = async ({ seed }: { seed: number }) => {
 const RandomNameStore = createAsyncStore(getSomeoneRandom)
 
 function Example() {
-  const [seed, setSeed] = useState<number>(undefined)
+  const [seed, setSeed] = useState<number>(0)
   const {
     data,
     run,
@@ -23,12 +23,9 @@ function Example() {
     loading,
     isRejected,
     isFulfilled
-  } = useStore(RandomNameStore, (dep) => [
-    dep.data,
-    dep.loading,
-    dep.isRejected,
-    dep.isFulfilled
-  ])
+  } = useAsyncStore(RandomNameStore, {
+    depFn: (dep) => [dep.data, dep.loading, dep.isRejected, dep.isFulfilled]
+  })
   return (
     <>
       <input

@@ -5,20 +5,40 @@ import {
   ComposedStore,
   StoreValueType,
   ComposedKeyType,
-  ComposedValueType
+  ComposedValueType,
+  ComposedKeyToContextType,
+  ContextType
 } from './types'
+import Container from './container'
 import { EMPTY } from './constants'
 import { areDepsEqual, isStore, isComposedStore } from './utils'
 
 type Deps<T> = (value: T) => unknown[]
 
+function useAsyncStore<T extends Store<any, any>>(
+  store: T,
+  options?: {
+    depFn?: Deps<StoreValueType<T>>
+  }
+): StoreValueType<T>
+function useAsyncStore<T extends ComposedStore<any, any, any>>(
+  store: T,
+  options?: {
+    depFn?: Deps<ComposedValueType<T>>
+    selector?: (
+      stores: ComposedKeyToContextType<T>
+    ) => ComposedKeyToContextType<T>[keyof ComposedKeyToContextType<T>][]
+  }
+): ComposedValueType<T>
 function useAsyncStore<
   T extends Store<any, any> | ComposedStore<any, any, any>
 >(
   store: T,
   options?: {
     depFn?: Deps<StoreValueType<T>>
-    selector?: (stores: T) => T[keyof T][]
+    selector?: (
+      stores: ComposedKeyToContextType<T>
+    ) => ComposedKeyToContextType<T>[keyof ComposedKeyToContextType<T>][]
   }
 ): StoreValueType<T> | ComposedValueType<T> {
   if (isStore(store)) {
@@ -29,9 +49,7 @@ function useAsyncStore<
       )
     }
 
-    const [state, setState] = useState<StoreValueType<T>>(
-      container.data as StoreValueType<T>
-    )
+    const [state, setState] = useState<StoreValueType<T>>(container.data)
 
     const oldDepsRef = useRef<unknown[]>([])
 
@@ -55,16 +73,78 @@ function useAsyncStore<
 
     return state
   } else if (isComposedStore(store)) {
-    const storesToUse = {} as typeof store
-    const selectedStores = options?.selector?.(store) ?? Object.values(store)
+    console.log('composed store', store)
+    const { keyToContext } = store
+    const storeValues = Object.values(keyToContext)
+    const selectedContexts = (options?.selector?.(
+      keyToContext as ComposedKeyToContextType<T>
+    ) ?? storeValues) as ComposedKeyToContextType<
+      T
+    >[keyof ComposedKeyToContextType<T>][]
 
-    const storeNames = Object.keys(store)
-    const storeValues = Object.values(store)
-
-    for (const selectedStore of selectedStores) {
-      const index = storeValues.indexOf(selectedStore)
-      storesToUse[storeNames[index] as ComposedKeyType<T>] = storeValues[index]
+    console.log('selectedStores', selectedContexts, storeValues)
+    const selectedKeyToContexts: any = {}
+    for (const key in keyToContext) {
+      let context
+      if (
+        (context = selectedContexts.find((item) => item === keyToContext[key]))
+      ) {
+        selectedKeyToContexts[key] = context
+      }
     }
+
+    console.log('selectedKeyToContexts', selectedKeyToContexts)
+
+    const containers = {} as Record<string, Container<any>>
+    for (const storeKey in selectedKeyToContexts) {
+      const container = useContext(selectedKeyToContexts[storeKey])
+      if (container === EMPTY) {
+        throw Error(
+          '`useAsyncStore` should be wrapped in an `AsyncStore.Provider`.'
+        )
+      }
+      containers[storeKey] = container
+    }
+
+    const getData = () => {
+      const data = {} as any
+      for (const containerKey in containers) {
+        data[containerKey] = containers[containerKey].data
+      }
+      return data
+    }
+
+    const [state, setState] = useState<ComposedValueType<T>>(getData())
+
+    const oldDepsRef = useRef<unknown[]>([])
+
+    useEffect(() => {
+      const subscriber = () => {
+        const data = getData()
+        console.log('data', data)
+
+        if (!options?.depFn) {
+          setState(data)
+        } else {
+          const oldDeps = oldDepsRef.current
+          const newDeps = options?.depFn(data)
+          if (!areDepsEqual(oldDeps, newDeps)) setState(data)
+          oldDepsRef.current = newDeps
+        }
+      }
+
+      console.log('containers', containers)
+      Object.values(containers).forEach((item) =>
+        item.subscribers.add(subscriber)
+      )
+      return () => {
+        Object.values(containers).forEach((item) =>
+          item.subscribers.delete(subscriber)
+        )
+      }
+    }, [])
+
+    return state
   }
 }
 

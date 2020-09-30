@@ -1,11 +1,4 @@
-import React, {
-  FC,
-  useRef,
-  useState,
-  createContext,
-  PropsWithChildren,
-  useCallback
-} from 'react'
+import React, { FC, useRef, useState, useCallback, createContext } from 'react'
 
 import Container from './container'
 import Executor from './Executor'
@@ -17,7 +10,7 @@ export type Hook<T, U> = (props: T) => U
 function createStore<T, U>(hook: Hook<T, U>): Store<T, U> {
   const Ctx = createContext<Container<U> | typeof EMPTY>(EMPTY)
 
-  const Provider: FC<PropsWithChildren<T>> = (props) => {
+  const Provider: FC<T> = (props) => {
     const containerRef = useRef<Container<U>>(new Container<U>())
     const container = containerRef.current
 

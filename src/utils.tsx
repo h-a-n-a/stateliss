@@ -4,7 +4,9 @@ import React, {
   PropsWithChildren,
   ReactNode
 } from 'react'
+
 import { ExecutorProps } from './Executor'
+import { AsyncFn } from './createAsyncStore'
 import { AsyncExecutorProps } from './AsyncExecutor'
 import { ComposedStore, Store } from './types'
 
@@ -47,7 +49,7 @@ export function areDepsEqual(oldDeps: unknown[], newDeps: unknown[]) {
 }
 
 interface ComponentWithProps {
-  component: FC<PropsWithChildren<any>>
+  component: FC<any>
   props: Record<string, any>
 }
 
@@ -67,9 +69,9 @@ function createComponentTree<T extends ReactNode>(
   lastChildren?: T
 }> {
   const isLastNode = index === components.length - 1
-  const internalComponentState = components[index]
-  const Component = internalComponentState.component
-  const componentProps = internalComponentState.props
+  const currentDetailedComponent = components[index]
+  const Component = currentDetailedComponent.component
+  const componentProps = currentDetailedComponent.props
 
   if (isLastNode) {
     // eslint-disable-next-line react/no-children-prop
@@ -94,4 +96,14 @@ export function isComposedStore(
 
 export function isStore(store: unknown): store is Store<any, any> {
   return typeof store === 'object' && 'Context' in store
+}
+
+export function isAsyncFunction(value: unknown): value is AsyncFn<any, any> {
+  return typeof value === 'function'
+}
+
+export function isAsyncFunctions(
+  value: unknown
+): value is Record<string, AsyncFn<any, any>> {
+  return value && typeof value === 'object'
 }

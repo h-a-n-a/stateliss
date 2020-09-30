@@ -1,30 +1,35 @@
 import React, {
   FC,
   useRef,
+  Context,
   useState,
   useCallback,
-  createContext,
-  PropsWithChildren,
-  Context
+  createContext
 } from 'react'
 
 import Container from './container'
 import AsyncExecutor, { AsyncData } from './AsyncExecutor'
 import { EMPTY } from './constants'
 import { Store, ComposedStore, ComposedStoreProps, ContextType } from './types'
-import { composeComponents } from './utils'
+import { composeComponents, isAsyncFunction, isAsyncFunctions } from './utils'
 
 export type AsyncFn<T extends Record<string, any>, U> = (props: T) => Promise<U>
 
 function createAsyncStore<T, U, P extends string>(
+  asyncFn: AsyncFn<T, U>
+): Store<T, AsyncData<T, U>>
+function createAsyncStore<T, U, P extends string>(
+  asyncFn: Record<P, AsyncFn<T, U>>
+): ComposedStore<Record<P, T>, AsyncData<T, U>, P>
+function createAsyncStore<T, U, P extends string>(
   asyncFn: AsyncFn<T, U> | Record<P, AsyncFn<T, U>>
 ): Store<T, AsyncData<T, U>> | ComposedStore<Record<P, T>, AsyncData<T, U>, P> {
-  if (typeof asyncFn === 'function') {
+  if (isAsyncFunction(asyncFn)) {
     return createStore(asyncFn)
-  } else if (asyncFn && typeof asyncFn === 'object') {
+  } else if (isAsyncFunctions(asyncFn)) {
     if ('Provider' in asyncFn || `Context` in asyncFn) {
       throw new Error(
-        '`Provider` or `Context` is a pre-defined keyword in unshaped. Use other property name instead.'
+        '`Provider` or `Context` is a pre-defined keyword in unshaped. You may use other property name instead.'
       )
     }
     // { Provider: <NestedProviders>{children}</NestedProviders>, Context: [Context1, Context2, Context3] }
@@ -32,31 +37,32 @@ function createAsyncStore<T, U, P extends string>(
   }
 
   function createStores(asyncFns: Record<P, AsyncFn<T, U>>) {
-    const storeStack: { name: P; store: ReturnType<typeof createStore> }[] = []
+    const stores: { name: P; store: ReturnType<typeof createStore> }[] = []
 
     for (const asyncFnName in asyncFns) {
-      storeStack.push({
+      if (!asyncFns.hasOwnProperty(asyncFnName)) continue
+      stores.push({
         name: asyncFnName,
         store: createStore(asyncFns[asyncFnName])
       })
     }
 
-    const Provider: FC<PropsWithChildren<ComposedStoreProps<Record<P, T>>>> = ({
+    const Provider: FC<ComposedStoreProps<Record<P, T>>> = ({
       providerProps,
       children
     }) => {
-      const components = storeStack.reduce((components, currentComponent) => {
-        return components.concat({
+      const providers = stores.reduce((provider, currentComponent) => {
+        return provider.concat({
           component: currentComponent.store.Provider,
-          props: providerProps[currentComponent.name]
+          props: providerProps?.[currentComponent.name] ?? {}
         })
       }, [])
-      return composeComponents(components, children)
+      return composeComponents(providers, children)
     }
 
     return {
       Provider,
-      keyToContext: storeStack.reduce(
+      keyToContext: stores.reduce(
         (components, currentComponent) => ({
           ...components,
           [currentComponent.name]: currentComponent.store.Context
@@ -69,7 +75,7 @@ function createAsyncStore<T, U, P extends string>(
   function createStore(asyncFn: AsyncFn<T, U>) {
     const Ctx = createContext<Container<AsyncData<T, U>> | typeof EMPTY>(EMPTY)
 
-    const Provider: FC<PropsWithChildren<T>> = (props) => {
+    const Provider: FC<T> = (props) => {
       const containerRef = useRef(new Container<AsyncData<T, U>>())
       const container = containerRef.current
 
