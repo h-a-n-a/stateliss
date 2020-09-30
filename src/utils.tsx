@@ -89,9 +89,9 @@ function createComponentTree<T extends ReactNode>(
 export function isComposedStore(
   store: unknown
 ): store is ComposedStore<any, any, any> {
-  return store && typeof store === 'object' && 'keyToContext' in store
+  return typeof store === 'object' && 'keyToContext' in store
 }
 
 export function isStore(store: unknown): store is Store<any, any> {
-  return store && typeof store === 'object' && 'Context' in store
+  return typeof store === 'object' && 'Context' in store
 }

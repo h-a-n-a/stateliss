@@ -1,8 +1,8 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 
 import {
-  ComposedStore,
   Store,
+  ComposedStore,
   StoreValueType,
   ComposedKeyType,
   ComposedValueType
