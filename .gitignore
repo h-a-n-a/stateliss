@@ -10,6 +10,7 @@ lerna-debug.log
 # production
 dist
 lib
+es
 
 # misc
 .DS_Store
