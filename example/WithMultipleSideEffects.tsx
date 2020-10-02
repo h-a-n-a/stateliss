@@ -59,5 +59,7 @@ function Example() {
 export default () => (
   <RandomNameStore.Provider seed={20}>
     <Example />
+    <br />
+    <Example />
   </RandomNameStore.Provider>
 )
