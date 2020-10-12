@@ -14,7 +14,7 @@ export interface AsyncData<T, U = unknown> {
   loading: boolean
   error: any
   refresh: () => void
-  run: (params: T) => void
+  run: (params?: T) => void
 }
 
 function AsyncExecutor<T, U>({
@@ -27,8 +27,9 @@ function AsyncExecutor<T, U>({
   const [loading, setLoading] = useState<boolean>(false)
 
   const [refreshFlag, setRefreshFlag] = useState({})
-  const [asyncParams, setAsyncParams] = useState<T>()
   const initialized = useRef(false)
+  const paramsRef = useRef<T>(defaultAsyncParams)
+  console.log('defaultAsyncParams', defaultAsyncParams)
 
   const resetStatus = () => {
     setLoading(false)
@@ -40,8 +41,10 @@ function AsyncExecutor<T, U>({
     setRefreshFlag({})
   }
 
-  const run = (params: T) => {
-    setAsyncParams(params)
+  const run = (params?: T) => {
+    console.log('params', params)
+    paramsRef.current = params ?? defaultAsyncParams
+    refresh()
   }
 
   useEffect(() => {
@@ -52,7 +55,7 @@ function AsyncExecutor<T, U>({
 
     resetStatus()
     setLoading(true)
-    asyncFn({ ...defaultAsyncParams, ...asyncParams })
+    asyncFn(paramsRef.current)
       .then((res) => {
         setData(res)
       })
@@ -66,7 +69,7 @@ function AsyncExecutor<T, U>({
     return () => {
       setLoading(false)
     }
-  }, [defaultAsyncParams, asyncParams, refreshFlag])
+  }, [refreshFlag])
 
   useEffect(() => {
     onChange({

@@ -7,9 +7,9 @@ import WithMultipleSideEffects from './WithMultipleSideEffects'
 function App() {
   return (
     <>
-      <h4>Without side effect</h4>
-      <WithoutSideEffect />
-      <hr />
+      {/*<h4>Without side effect</h4>*/}
+      {/*<WithoutSideEffect />*/}
+      {/*<hr />*/}
       <h4>With side effect</h4>
       <WithSideEffect />
       <h4>With multiple side effects</h4>

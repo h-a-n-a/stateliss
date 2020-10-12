@@ -35,9 +35,9 @@ function Example() {
     }
   })
   const { asyncFn1, asyncFn2 } = data
-  console.log('rendered')
   return (
     <>
+      <p>Negative `data` would be marked as errors</p>
       <input
         value={seed}
         onChange={(evt) => {
@@ -50,14 +50,14 @@ function Example() {
       <h4>AsyncFn1</h4>
       <div>loading: {String(asyncFn1.loading)}</div>
       <div>error: {String(asyncFn1.error)}</div>
-      <div>name: {asyncFn1.data}</div>
+      <div>data: {asyncFn1.data}</div>
       <button onClick={() => asyncFn1.run({ seed })}>Run with inputs!</button>
       <button onClick={asyncFn1.refresh}>Refresh Data</button>
 
       <h4>AsyncFn2</h4>
       <div>loading: {String(asyncFn2.loading)}</div>
       <div>error: {String(asyncFn2.error)}</div>
-      <div>name: {asyncFn2.data}</div>
+      <div>data: {asyncFn2.data}</div>
       <button onClick={() => asyncFn2.run({ seed2: seed })}>
         Run with inputs!
       </button>
@@ -67,7 +67,7 @@ function Example() {
 }
 
 export default () => (
-  <RandomNameStore.Provider>
+  <RandomNameStore.Provider asyncFn1={{ seed: 123 }} asyncFn2={{ seed2: 456 }}>
     <Example />
     <br />
     <Example />

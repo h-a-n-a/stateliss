@@ -81,7 +81,7 @@ function createComponentTree<T extends ReactNode>(
   } else {
     return React.createElement(
       Component,
-      {},
+      componentProps ?? {},
       createComponentTree(components, lastChildren, ++index)
     )
   }

@@ -19,7 +19,7 @@ function Example() {
   const { data, run, refresh, loading, error } = useAsyncStore(
     RandomNameStore,
     {
-      depFn: (dep) => [dep.data, dep.loading, dep.isRejected, dep.isFulfilled]
+      depFn: (dep) => [dep.data, dep.loading]
     }
   )
   return (
@@ -35,7 +35,7 @@ function Example() {
       />
       <div>loading: {String(loading)}</div>
       <div>error: {String(error)}</div>
-      <div>name: {data}</div>
+      <div>data: {data}</div>
       <button onClick={() => run({ seed })}>Run with inputs!</button>
       <button onClick={refresh}>Refresh Data</button>
     </>

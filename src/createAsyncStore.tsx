@@ -29,7 +29,7 @@ function createAsyncStore<T extends AsyncFn<any, any>>(
 >
 function createAsyncStore<T extends Record<string, AsyncFn<any, any>>>(
   asyncFn: T
-): ComposedStore<ComposedAsyncFnPropsType<T>, ComposedContextType<T>>
+): ComposedStore<Partial<ComposedAsyncFnPropsType<T>>, ComposedContextType<T>>
 function createAsyncStore<
   T extends AsyncFn<any, any> | Record<string, AsyncFn<any, any>>
 >(asyncFn: T): any {
@@ -61,11 +61,12 @@ function createAsyncStore<
       })
     }
 
-    const Provider: FC<ComposedAsyncFnPropsType<R>> = ({
+    const Provider: FC<Partial<ComposedAsyncFnPropsType<R>>> = ({
       children,
       ...props
     }) => {
       const providers = stores.reduce((provider, currentComponent) => {
+        console.log((props as any)[currentComponent.name])
         return provider.concat({
           component: currentComponent.store.Provider,
           props: (props as any)[currentComponent.name] ?? {}
