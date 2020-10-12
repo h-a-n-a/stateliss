@@ -17,6 +17,7 @@ es
 .DS_Store
 .cache
 coverage
+.npmrc
 
 # Editor directories and files
 .idea
