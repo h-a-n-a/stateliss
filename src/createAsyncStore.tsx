@@ -66,7 +66,6 @@ function createAsyncStore<
       ...props
     }) => {
       const providers = stores.reduce((provider, currentComponent) => {
-        console.log((props as any)[currentComponent.name])
         return provider.concat({
           component: currentComponent.store.Provider,
           props: (props as any)[currentComponent.name] ?? {}

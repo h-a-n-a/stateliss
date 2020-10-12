@@ -29,7 +29,6 @@ function AsyncExecutor<T, U>({
   const [refreshFlag, setRefreshFlag] = useState({})
   const initialized = useRef(false)
   const paramsRef = useRef<T>(defaultAsyncParams)
-  console.log('defaultAsyncParams', defaultAsyncParams)
 
   const resetStatus = () => {
     setLoading(false)
@@ -42,7 +41,6 @@ function AsyncExecutor<T, U>({
   }
 
   const run = (params?: T) => {
-    console.log('params', params)
     paramsRef.current = params ?? defaultAsyncParams
     refresh()
   }
