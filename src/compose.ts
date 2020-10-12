@@ -1,4 +1,4 @@
-import { AsyncFn } from './createAsyncStore'
+import { AsyncFn } from './types'
 
 function compose<T extends Record<string, AsyncFn<any, any>>>(
   ...asyncStores: T[]

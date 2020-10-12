@@ -12,23 +12,30 @@ const getSomeoneRandom = async ({ seed }: { seed: number }) => {
   })
 }
 
+const getSomethingReallyRandom = async ({ seed2 }: { seed2: number }) => {
+  return await new Promise<number>((res, rej) => {
+    const val = crypto.getRandomValues(
+      new Int32Array([seed2 + Math.random()])
+    )[0]
+    console.log(val)
+    setTimeout(val > 0 ? res : rej, 300, val)
+  })
+}
+
 const RandomNameStore = createAsyncStore({
   asyncFn1: getSomeoneRandom,
-  asyncFn2: getSomeoneRandom
+  asyncFn2: getSomethingReallyRandom
 })
 
 function Example() {
   const [seed, setSeed] = useState<number>(0)
   const data = useAsyncStore(RandomNameStore, {
-    selector: (stores) => {
-      return [stores.asyncFn1, stores.asyncFn2]
-    },
     depFn: (state) => {
-      // buggy
-      return []
+      return [state.asyncFn1]
     }
   })
   const { asyncFn1, asyncFn2 } = data
+  console.log('rendered')
   return (
     <>
       <input
@@ -51,16 +58,18 @@ function Example() {
       <div>loading: {String(asyncFn2.loading)}</div>
       <div>error: {String(asyncFn2.error)}</div>
       <div>name: {asyncFn2.data}</div>
-      <button onClick={() => asyncFn2.run({ seed })}>Run with inputs!</button>
+      <button onClick={() => asyncFn2.run({ seed2: seed })}>
+        Run with inputs!
+      </button>
       <button onClick={asyncFn2.refresh}>Refresh Data</button>
     </>
   )
 }
 
 export default () => (
-  <RandomNameStore.Provider seed={20}>
+  <RandomNameStore.Provider>
     <Example />
     <br />
-    {/*<Example />*/}
+    <Example />
   </RandomNameStore.Provider>
 )

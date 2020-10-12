@@ -1,13 +1,10 @@
 import { FC, Context } from 'react'
 
 import Container from './container'
+import { AsyncData } from './AsyncExecutor'
 import { EMPTY } from './constants'
 
 export type ContextType<T> = Context<Container<T> | typeof EMPTY>
-
-export type ContextTypes<T> = {
-  [K in keyof T]: ContextType<T[K]>
-}
 
 export type Store<T, U> = {
   Provider: FC<T>
@@ -35,6 +32,14 @@ export type ComposedAsyncFnDataType<
 > = {
   [K in keyof T]: AsyncFnDataType<T[K]>
 }
+
+export type ComposedContextType<T> = T extends Record<string, AsyncFn<any, any>>
+  ? {
+      [K in keyof T]: ContextType<
+        AsyncData<AsyncFnPropsType<T[K]>, AsyncFnDataType<T[K]>>
+      >
+    }
+  : unknown
 
 export type ComposedStore<T, U extends Record<string, ContextType<any>>> = {
   Provider: FC<T>

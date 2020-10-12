@@ -18,8 +18,7 @@ import {
   ComposedStore,
   ComposedAsyncFnPropsType,
   ContextType,
-  ComposedAsyncFnDataType,
-  ContextTypes
+  ComposedContextType
 } from './types'
 import { composeComponents, isAsyncFunction, isAsyncFunctions } from './utils'
 
@@ -31,10 +30,7 @@ function createAsyncStore<T extends AsyncFn<any, any>>(
 >
 function createAsyncStore<T extends Record<string, AsyncFn<any, any>>>(
   asyncFn: T
-): ComposedStore<
-  ComposedAsyncFnPropsType<T>,
-  ContextTypes<ComposedAsyncFnDataType<T>>
->
+): ComposedStore<ComposedAsyncFnPropsType<T>, ComposedContextType<T>>
 function createAsyncStore<
   T extends AsyncFn<any, any> | Record<string, AsyncFn<any, any>>
 >(asyncFn: T): any {
@@ -85,7 +81,7 @@ function createAsyncStore<
         }),
         {} as {
           [K in keyof R]: ContextType<
-            AsyncData<ComposedAsyncFnPropsType<K>, ComposedAsyncFnDataType<K>>
+            AsyncData<AsyncFnPropsType<R[K]>, AsyncFnDataType<R[K]>>
           >
         }
       )
@@ -95,26 +91,19 @@ function createAsyncStore<
   function createStore(
     asyncFn: AsyncFn<AsyncFnPropsType<T>, AsyncFnDataType<T>>
   ) {
-    const Ctx = createContext<
-      | Container<AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>>
-      | typeof EMPTY
-    >(EMPTY)
+    type DataType = AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>
+    const Ctx = createContext<Container<DataType> | typeof EMPTY>(EMPTY)
 
     const Provider: FC<T> = (props) => {
-      const containerRef = useRef(
-        new Container<AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>>()
-      )
+      const containerRef = useRef(new Container<DataType>())
       const container = containerRef.current
 
       const [hasExecutorMounted, setHasExecutorMounted] = useState(false)
-      const onChange = useCallback(
-        (data: AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>) => {
-          if (!hasExecutorMounted) setHasExecutorMounted(true)
-          container.data = data
-          container.notify()
-        },
-        []
-      )
+      const onChange = useCallback((data: DataType) => {
+        if (!hasExecutorMounted) setHasExecutorMounted(true)
+        container.data = data
+        container.notify()
+      }, [])
 
       return (
         <Ctx.Provider value={container}>
