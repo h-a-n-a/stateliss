@@ -5,10 +5,8 @@ import {
   ComposedStore,
   StoreValueType,
   ComposedValueType,
-  ComposedKeyToContextType,
   ComposedKeyValueType
 } from './types'
-import { AsyncData } from './AsyncExecutor'
 import Container from './container'
 import { EMPTY } from './constants'
 import { areDepsEqual, isStore, isComposedStore } from './utils'
@@ -48,12 +46,11 @@ function useAsyncStore<T extends Store<any, any> | ComposedStore<any, any>>(
     useEffect(() => {
       const subscriber = () => {
         if (!options?.depFn) {
-          setState(container.data as StoreValueType<T>)
+          setState(container.data)
         } else {
           const oldDeps = oldDepsRef.current
-          const newDeps = options?.depFn(container.data as StoreValueType<T>)
-          if (!areDepsEqual(oldDeps, newDeps))
-            setState(container.data as StoreValueType<T>)
+          const newDeps = options?.depFn(container.data)
+          if (!areDepsEqual(oldDeps, newDeps)) setState(container.data)
           oldDepsRef.current = newDeps
         }
       }
@@ -81,7 +78,7 @@ function useAsyncStore<T extends Store<any, any> | ComposedStore<any, any>>(
     }
 
     const getData = () => {
-      const data = {} as any
+      const data = {} as ComposedValueType<T>
       for (const containerKey in containers) {
         data[containerKey] = containers[containerKey].data
       }

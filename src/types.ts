@@ -27,6 +27,10 @@ export type ComposedAsyncFnPropsType<
   [K in keyof T]: AsyncFnPropsType<T[K]>
 }
 
+// export type ComposedAsyncFnNonVoidPropsType<
+//   T extends Record<string, AsyncFn<any, any>>
+// > = {}
+
 export type ComposedAsyncFnDataType<
   T extends Record<string, AsyncFn<any, any>>
 > = {

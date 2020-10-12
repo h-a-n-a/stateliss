@@ -8,19 +8,18 @@ import React, {
 } from 'react'
 
 import Container from './container'
-import AsyncExecutor, { AsyncData } from './AsyncExecutor'
 import { EMPTY } from './constants'
 import {
   Store,
   AsyncFn,
-  AsyncFnPropsType,
-  AsyncFnDataType,
   ComposedStore,
-  ComposedAsyncFnPropsType,
-  ContextType,
-  ComposedContextType
+  AsyncFnDataType,
+  AsyncFnPropsType,
+  ComposedContextType,
+  ComposedAsyncFnPropsType
 } from './types'
 import { composeComponents, isAsyncFunction, isAsyncFunctions } from './utils'
+import AsyncExecutor, { AsyncData } from './AsyncExecutor'
 
 function createAsyncStore<T extends AsyncFn<any, any>>(
   asyncFn: T
@@ -62,11 +61,14 @@ function createAsyncStore<
       })
     }
 
-    const Provider: FC<ComposedAsyncFnPropsType<R>> = ({ children }) => {
+    const Provider: FC<ComposedAsyncFnPropsType<R>> = ({
+      children,
+      ...props
+    }) => {
       const providers = stores.reduce((provider, currentComponent) => {
         return provider.concat({
           component: currentComponent.store.Provider,
-          props: currentComponent.name ?? {}
+          props: (props as any)[currentComponent.name] ?? {}
         })
       }, [])
       return composeComponents(providers, children)
@@ -79,11 +81,7 @@ function createAsyncStore<
           ...components,
           [currentComponent.name]: currentComponent.store.Context
         }),
-        {} as {
-          [K in keyof R]: ContextType<
-            AsyncData<AsyncFnPropsType<R[K]>, AsyncFnDataType<R[K]>>
-          >
-        }
+        {} as ComposedContextType<R>
       )
     }
   }
