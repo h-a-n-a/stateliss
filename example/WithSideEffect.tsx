@@ -16,16 +16,12 @@ const RandomNameStore = createAsyncStore(getSomeoneRandom)
 
 function Example() {
   const [seed, setSeed] = useState<number>(0)
-  const {
-    data,
-    run,
-    refresh,
-    loading,
-    isRejected,
-    isFulfilled
-  } = useAsyncStore(RandomNameStore, {
-    depFn: (dep) => [dep.data, dep.loading, dep.isRejected, dep.isFulfilled]
-  })
+  const { data, run, refresh, loading, error } = useAsyncStore(
+    RandomNameStore,
+    {
+      depFn: (dep) => [dep.data, dep.loading, dep.isRejected, dep.isFulfilled]
+    }
+  )
   return (
     <>
       <input
@@ -38,8 +34,7 @@ function Example() {
         }}
       />
       <div>loading: {String(loading)}</div>
-      <div>isFulfilled: {String(isFulfilled)}</div>
-      <div>isRejected: {String(isRejected)}</div>
+      <div>error: {String(error)}</div>
       <div>name: {data}</div>
       <button onClick={() => run({ seed })}>Run with inputs!</button>
       <button onClick={refresh}>Refresh Data</button>

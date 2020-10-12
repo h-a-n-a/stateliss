@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, ReactElement, useRef } from 'react'
 
-import { AsyncFn } from './createAsyncStore'
+import { AsyncFn } from './types'
 import { arePropsEqual } from './utils'
 
 export interface AsyncExecutorProps<T, U> {
@@ -12,8 +12,7 @@ export interface AsyncExecutorProps<T, U> {
 export interface AsyncData<T, U = unknown> {
   data: U
   loading: boolean
-  isFulfilled: boolean
-  isRejected: boolean
+  error: any
   refresh: () => void
   run: (params: T) => void
 }
@@ -23,10 +22,9 @@ function AsyncExecutor<T, U>({
   defaultAsyncParams,
   onChange
 }: AsyncExecutorProps<T, U>) {
-  const [result, setResult] = useState<U>()
+  const [data, setData] = useState<U>()
+  const [error, setError] = useState()
   const [loading, setLoading] = useState<boolean>(false)
-  const [isFulfilled, setIsFulfilled] = useState<boolean>(false)
-  const [isRejected, setIsRejected] = useState<boolean>(false)
 
   const [refreshFlag, setRefreshFlag] = useState({})
   const [asyncParams, setAsyncParams] = useState<T>()
@@ -34,8 +32,8 @@ function AsyncExecutor<T, U>({
 
   const resetStatus = () => {
     setLoading(false)
-    setIsFulfilled(false)
-    setIsRejected(false)
+    setData(undefined)
+    setError(undefined)
   }
 
   const refresh = () => {
@@ -56,12 +54,10 @@ function AsyncExecutor<T, U>({
     setLoading(true)
     asyncFn({ ...defaultAsyncParams, ...asyncParams })
       .then((res) => {
-        setResult(res)
-        setIsFulfilled(true)
+        setData(res)
       })
       .catch((err) => {
-        setResult(err)
-        setIsFulfilled(true)
+        setError(err)
       })
       .finally(() => {
         setLoading(false)
@@ -74,14 +70,13 @@ function AsyncExecutor<T, U>({
 
   useEffect(() => {
     onChange({
-      isRejected,
-      isFulfilled,
       loading,
-      data: result,
+      data,
+      error,
       refresh,
       run
     })
-  }, [isRejected, isFulfilled, loading, result])
+  }, [error, loading, data])
 
   return null as ReactElement
 }

@@ -10,20 +10,34 @@ import React, {
 import Container from './container'
 import AsyncExecutor, { AsyncData } from './AsyncExecutor'
 import { EMPTY } from './constants'
-import { Store, ComposedStore, ComposedStoreProps, ContextType } from './types'
+import {
+  Store,
+  AsyncFn,
+  AsyncFnPropsType,
+  AsyncFnDataType,
+  ComposedStore,
+  ComposedAsyncFnPropsType,
+  ContextType,
+  ComposedAsyncFnDataType,
+  ContextTypes
+} from './types'
 import { composeComponents, isAsyncFunction, isAsyncFunctions } from './utils'
 
-export type AsyncFn<T extends Record<string, any>, U> = (props: T) => Promise<U>
-
-function createAsyncStore<T, U, P extends string>(
-  asyncFn: AsyncFn<T, U>
-): Store<T, AsyncData<T, U>>
-function createAsyncStore<T, U, P extends string>(
-  asyncFn: Record<P, AsyncFn<T, U>>
-): ComposedStore<Record<P, T>, AsyncData<T, U>, P>
-function createAsyncStore<T, U, P extends string>(
-  asyncFn: AsyncFn<T, U> | Record<P, AsyncFn<T, U>>
-): Store<T, AsyncData<T, U>> | ComposedStore<Record<P, T>, AsyncData<T, U>, P> {
+function createAsyncStore<T extends AsyncFn<any, any>>(
+  asyncFn: T
+): Store<
+  AsyncFnPropsType<T>,
+  AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>
+>
+function createAsyncStore<T extends Record<string, AsyncFn<any, any>>>(
+  asyncFn: T
+): ComposedStore<
+  ComposedAsyncFnPropsType<T>,
+  ContextTypes<ComposedAsyncFnDataType<T>>
+>
+function createAsyncStore<
+  T extends AsyncFn<any, any> | Record<string, AsyncFn<any, any>>
+>(asyncFn: T): any {
   if (isAsyncFunction(asyncFn)) {
     return createStore(asyncFn)
   } else if (isAsyncFunctions(asyncFn)) {
@@ -36,8 +50,13 @@ function createAsyncStore<T, U, P extends string>(
     return createStores(asyncFn)
   }
 
-  function createStores(asyncFns: Record<P, AsyncFn<T, U>>) {
-    const stores: { name: P; store: ReturnType<typeof createStore> }[] = []
+  function createStores<R extends Record<string, AsyncFn<any, any>>>(
+    asyncFns: R
+  ) {
+    const stores: {
+      name: keyof R
+      store: ReturnType<typeof createStore>
+    }[] = []
 
     for (const asyncFnName in asyncFns) {
       if (!asyncFns.hasOwnProperty(asyncFnName)) continue
@@ -47,14 +66,11 @@ function createAsyncStore<T, U, P extends string>(
       })
     }
 
-    const Provider: FC<ComposedStoreProps<Record<P, T>>> = ({
-      providerProps,
-      children
-    }) => {
+    const Provider: FC<ComposedAsyncFnPropsType<R>> = ({ children }) => {
       const providers = stores.reduce((provider, currentComponent) => {
         return provider.concat({
           component: currentComponent.store.Provider,
-          props: providerProps?.[currentComponent.name] ?? {}
+          props: currentComponent.name ?? {}
         })
       }, [])
       return composeComponents(providers, children)
@@ -67,24 +83,38 @@ function createAsyncStore<T, U, P extends string>(
           ...components,
           [currentComponent.name]: currentComponent.store.Context
         }),
-        {} as Record<P, ContextType<AsyncData<T, U>>>
+        {} as {
+          [K in keyof R]: ContextType<
+            AsyncData<ComposedAsyncFnPropsType<K>, ComposedAsyncFnDataType<K>>
+          >
+        }
       )
     }
   }
 
-  function createStore(asyncFn: AsyncFn<T, U>) {
-    const Ctx = createContext<Container<AsyncData<T, U>> | typeof EMPTY>(EMPTY)
+  function createStore(
+    asyncFn: AsyncFn<AsyncFnPropsType<T>, AsyncFnDataType<T>>
+  ) {
+    const Ctx = createContext<
+      | Container<AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>>
+      | typeof EMPTY
+    >(EMPTY)
 
     const Provider: FC<T> = (props) => {
-      const containerRef = useRef(new Container<AsyncData<T, U>>())
+      const containerRef = useRef(
+        new Container<AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>>()
+      )
       const container = containerRef.current
 
       const [hasExecutorMounted, setHasExecutorMounted] = useState(false)
-      const onChange = useCallback((data: AsyncData<T, U>) => {
-        if (!hasExecutorMounted) setHasExecutorMounted(true)
-        container.data = data
-        container.notify()
-      }, [])
+      const onChange = useCallback(
+        (data: AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>) => {
+          if (!hasExecutorMounted) setHasExecutorMounted(true)
+          container.data = data
+          container.notify()
+        },
+        []
+      )
 
       return (
         <Ctx.Provider value={container}>

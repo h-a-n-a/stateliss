@@ -4,11 +4,11 @@ import {
   Store,
   ComposedStore,
   StoreValueType,
-  ComposedKeyType,
   ComposedValueType,
   ComposedKeyToContextType,
-  ContextType
+  ComposedKeyValueType
 } from './types'
+import { AsyncData } from './AsyncExecutor'
 import Container from './container'
 import { EMPTY } from './constants'
 import { areDepsEqual, isStore, isComposedStore } from './utils'
@@ -21,26 +21,24 @@ function useAsyncStore<T extends Store<any, any>>(
     depFn?: Deps<StoreValueType<T>>
   }
 ): StoreValueType<T>
-function useAsyncStore<T extends ComposedStore<any, any, any>>(
+function useAsyncStore<T extends ComposedStore<any, any>>(
   store: T,
   options?: {
-    depFn?: Deps<ComposedValueType<T>>
+    depFn?: Deps<AsyncData<any>>
     selector?: (
       stores: ComposedKeyToContextType<T>
     ) => ComposedKeyToContextType<T>[keyof ComposedKeyToContextType<T>][]
   }
-): ComposedValueType<T>
-function useAsyncStore<
-  T extends Store<any, any> | ComposedStore<any, any, any>
->(
+): ComposedKeyValueType<T>
+function useAsyncStore<T extends Store<any, any> | ComposedStore<any, any>>(
   store: T,
   options?: {
-    depFn?: Deps<StoreValueType<T>>
+    depFn?: Deps<StoreValueType<T> | ComposedKeyValueType<T>>
     selector?: (
       stores: ComposedKeyToContextType<T>
     ) => ComposedKeyToContextType<T>[keyof ComposedKeyToContextType<T>][]
   }
-): StoreValueType<T> | ComposedValueType<T> {
+): StoreValueType<T> | ComposedKeyValueType<T> {
   if (isStore(store)) {
     const container = useContext(store.Context)
     if (container === EMPTY) {
@@ -76,11 +74,7 @@ function useAsyncStore<
     console.log('composed store', store)
     const { keyToContext } = store
     const storeValues = Object.values(keyToContext)
-    const selectedContexts = (options?.selector?.(
-      keyToContext as ComposedKeyToContextType<T>
-    ) ?? storeValues) as ComposedKeyToContextType<
-      T
-    >[keyof ComposedKeyToContextType<T>][]
+    const selectedContexts = options?.selector?.(keyToContext) ?? storeValues
 
     console.log('selectedStores', selectedContexts, storeValues)
     const selectedKeyToContexts: any = {}
@@ -97,7 +91,9 @@ function useAsyncStore<
 
     const containers = {} as Record<string, Container<any>>
     for (const storeKey in selectedKeyToContexts) {
-      const container = useContext(selectedKeyToContexts[storeKey])
+      const container = useContext(selectedKeyToContexts[storeKey]) as
+        | Container<any>
+        | typeof EMPTY
       if (container === EMPTY) {
         throw Error(
           '`useAsyncStore` should be wrapped in an `AsyncStore.Provider`.'
@@ -121,7 +117,6 @@ function useAsyncStore<
     useEffect(() => {
       const subscriber = () => {
         const data = getData()
-        console.log('data', data)
 
         if (!options?.depFn) {
           setState(data)

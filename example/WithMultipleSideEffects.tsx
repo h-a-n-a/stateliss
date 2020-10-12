@@ -3,12 +3,12 @@ import { createAsyncStore, useAsyncStore } from '../src/index'
 
 const getSomeoneRandom = async ({ seed }: { seed: number }) => {
   console.log('Requested With Seed:', seed)
-  return await new Promise<number>((res) => {
-    setTimeout(
-      res,
-      300,
-      crypto.getRandomValues(new Int32Array([seed + Math.random()]))[0]
-    )
+  return await new Promise<number>((res, rej) => {
+    const val = crypto.getRandomValues(
+      new Int32Array([seed + Math.random()])
+    )[0]
+    console.log(val)
+    setTimeout(val > 0 ? res : rej, 300, val)
   })
 }
 
@@ -22,10 +22,13 @@ function Example() {
   const data = useAsyncStore(RandomNameStore, {
     selector: (stores) => {
       return [stores.asyncFn1, stores.asyncFn2]
+    },
+    depFn: (state) => {
+      // buggy
+      return []
     }
-  }) as any
+  })
   const { asyncFn1, asyncFn2 } = data
-  console.log('data WithMultipleSideEffects', data)
   return (
     <>
       <input
@@ -39,16 +42,14 @@ function Example() {
       />
       <h4>AsyncFn1</h4>
       <div>loading: {String(asyncFn1.loading)}</div>
-      <div>isFulfilled: {String(asyncFn1.isFulfilled)}</div>
-      <div>isRejected: {String(asyncFn1.isRejected)}</div>
+      <div>error: {String(asyncFn1.error)}</div>
       <div>name: {asyncFn1.data}</div>
       <button onClick={() => asyncFn1.run({ seed })}>Run with inputs!</button>
       <button onClick={asyncFn1.refresh}>Refresh Data</button>
 
       <h4>AsyncFn2</h4>
       <div>loading: {String(asyncFn2.loading)}</div>
-      <div>isFulfilled: {String(asyncFn2.isFulfilled)}</div>
-      <div>isRejected: {String(asyncFn2.isRejected)}</div>
+      <div>error: {String(asyncFn2.error)}</div>
       <div>name: {asyncFn2.data}</div>
       <button onClick={() => asyncFn2.run({ seed })}>Run with inputs!</button>
       <button onClick={asyncFn2.refresh}>Refresh Data</button>
@@ -60,6 +61,6 @@ export default () => (
   <RandomNameStore.Provider seed={20}>
     <Example />
     <br />
-    <Example />
+    {/*<Example />*/}
   </RandomNameStore.Provider>
 )

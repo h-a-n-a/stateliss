@@ -6,9 +6,8 @@ import React, {
 } from 'react'
 
 import { ExecutorProps } from './Executor'
-import { AsyncFn } from './createAsyncStore'
 import { AsyncExecutorProps } from './AsyncExecutor'
-import { ComposedStore, Store } from './types'
+import { ComposedStore, Store, AsyncFn } from './types'
 
 export const arePropsEqual = (
   prevProps: ExecutorProps<any, any> | AsyncExecutorProps<any, any>,
@@ -90,12 +89,14 @@ function createComponentTree<T extends ReactNode>(
 
 export function isComposedStore(
   store: unknown
-): store is ComposedStore<any, any, any> {
-  return typeof store === 'object' && 'keyToContext' in store
+): store is ComposedStore<any, any> {
+  return (
+    store && typeof store === 'object' && store.hasOwnProperty('keyToContext')
+  )
 }
 
 export function isStore(store: unknown): store is Store<any, any> {
-  return typeof store === 'object' && 'Context' in store
+  return store && typeof store === 'object' && store.hasOwnProperty('Context')
 }
 
 export function isAsyncFunction(value: unknown): value is AsyncFn<any, any> {
