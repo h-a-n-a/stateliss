@@ -1,13 +1,14 @@
+import typescript from "rollup-plugin-typescript2"
+
 module.exports = {
   external: ['react'],
-  input: 'lib/es/index.js',
+  input: 'src/index.ts',
   output: {
     name: 'unshaped',
-    globals: {
-      react: 'React',
-      'react-dom': 'ReactDOM',
-    },
-    file: 'lib/umd/unshaped.js',
-    format: 'umd',
+    file: 'lib/index.js',
+    format: 'commonjs',
   },
+  plugins: [
+    typescript()
+  ]
 }

@@ -1,8 +1,8 @@
 {
   "name": "unshaped",
   "version": "0.1.0",
-  "main": "./lib/es/index.js",
-  "module": "./lib/es/index.js",
+  "main": "es/index.js",
+  "module": "lib/index.js",
   "description": "Using react hooks and feeling shapeless",
   "license": "MIT",
   "private": false,
@@ -11,11 +11,12 @@
   },
   "scripts": {
     "start": "parcel ./example/index.html",
-    "build": "tsc",
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "rollup --config rollup.config.js",
     "test": "jest",
     "lint": "eslint '{src,mock,config}/**/*.{ts,tsx}'",
     "lint:fix": "eslint --fix '{src,mock,config}/**/*.{ts,tsx}'",
-    "umd": "rollup --config rollup.config.js",
     "release": "standard-version",
     "type": "tsc --project tsconfig.json --skipLibCheck --noEmit"
   },
@@ -25,6 +26,7 @@
     }
   },
   "files": [
+    "es",
     "lib"
   ],
   "devDependencies": {
@@ -52,6 +54,7 @@
     "react-dom": "^16.8.0",
     "react-test-renderer": "^16.8.0",
     "rollup": "^1.21.4",
+    "rollup-plugin-typescript2": "^0.27.3",
     "standard-version": "^8.0.2",
     "typescript": "^3.9.7"
   },

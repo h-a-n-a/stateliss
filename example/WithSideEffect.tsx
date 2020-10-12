@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { createAsyncStore, useStore } from '../src/index'
+import { createAsyncStore, useAsyncStore } from '../src/index'
 
 const getSomeoneRandom = async ({ seed }: { seed: number }) => {
   console.log('Requested With Seed:', seed)
@@ -15,20 +15,13 @@ const getSomeoneRandom = async ({ seed }: { seed: number }) => {
 const RandomNameStore = createAsyncStore(getSomeoneRandom)
 
 function Example() {
-  const [seed, setSeed] = useState<number>(undefined)
-  const {
-    data,
-    run,
-    refresh,
-    loading,
-    isRejected,
-    isFulfilled
-  } = useStore(RandomNameStore, (dep) => [
-    dep.data,
-    dep.loading,
-    dep.isRejected,
-    dep.isFulfilled
-  ])
+  const [seed, setSeed] = useState<number>(0)
+  const { data, run, refresh, loading, error } = useAsyncStore(
+    RandomNameStore,
+    {
+      depFn: (dep) => [dep.data, dep.loading]
+    }
+  )
   return (
     <>
       <input
@@ -41,9 +34,8 @@ function Example() {
         }}
       />
       <div>loading: {String(loading)}</div>
-      <div>isFulfilled: {String(isFulfilled)}</div>
-      <div>isRejected: {String(isRejected)}</div>
-      <div>name: {data}</div>
+      <div>error: {String(error)}</div>
+      <div>data: {data}</div>
       <button onClick={() => run({ seed })}>Run with inputs!</button>
       <button onClick={refresh}>Refresh Data</button>
     </>

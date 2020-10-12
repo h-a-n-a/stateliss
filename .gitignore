@@ -5,11 +5,13 @@ node_modules
 npm-debug.log*
 yarn-error.log
 yarn.lock
+package-lock.json
 lerna-debug.log
 
 # production
 dist
 lib
+es
 
 # misc
 .DS_Store

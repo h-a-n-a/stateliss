@@ -1,4 +1,5 @@
 import { AsyncData } from './AsyncExecutor'
+
 type Subscriber = () => void
 
 class Container<T> {
