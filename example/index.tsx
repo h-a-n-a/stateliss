@@ -1,19 +1,52 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { render } from 'react-dom'
-import WithoutSideEffect from './WithoutSideEffect'
-import WithSideEffect from './WithSideEffect'
-import WithMultipleSideEffects from './WithMultipleSideEffects'
+import CustomHook from './CustomHook'
+import ComposedSideEffects from './ComposedSideEffects'
+
+import styles from './index.less'
+
+enum ExampleType {
+  HOOKS,
+  SIDE_EFFECTS
+}
 
 function App() {
+  const [exampleType, setExampleType] = useState<ExampleType>(ExampleType.HOOKS)
+
+  const renderExample = () => {
+    if (exampleType === ExampleType.HOOKS) {
+      return (
+        <>
+          <h2>Custom Hook: Counter</h2>
+          <CustomHook />
+        </>
+      )
+    }
+
+    if (exampleType === ExampleType.SIDE_EFFECTS) {
+      return (
+        <>
+          <h2>Side Effect</h2>
+          <ComposedSideEffects />
+        </>
+      )
+    }
+
+    return null
+  }
+
   return (
     <>
-      {/*<h4>Without side effect</h4>*/}
-      {/*<WithoutSideEffect />*/}
-      {/*<hr />*/}
-      <h4>With side effect</h4>
-      <WithSideEffect />
-      <h4>With multiple side effects</h4>
-      <WithMultipleSideEffects />
+      <div className={styles.container}>
+        <span>Examples:</span>
+        <button onClick={() => setExampleType(ExampleType.HOOKS)}>
+          Custom Hook
+        </button>
+        <button onClick={() => setExampleType(ExampleType.SIDE_EFFECTS)}>
+          Side Effect
+        </button>
+      </div>
+      {renderExample()}
     </>
   )
 }

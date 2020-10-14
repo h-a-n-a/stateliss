@@ -3,5 +3,5 @@
   "compilerOptions": {
     "jsx": "react"
   },
-  "include": ["."]
+  "include": [".", "./typings.d.ts"]
 }
