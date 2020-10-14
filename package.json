@@ -1,6 +1,6 @@
 {
   "name": "unshaped",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "main": "es/index.js",
   "module": "lib/index.js",
   "description": "Using react hooks and feeling shapeless",
