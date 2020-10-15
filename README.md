@@ -157,7 +157,7 @@ export default App
 ```ts
 const Store = createStore<T, U>(
   hook: (props: T) => U
-): Store<T, U>
+)
 ```
 
 ### `useStore`
@@ -176,7 +176,7 @@ const state: StoreValueType<T> = useStore<T extends Store<any, any>>(
 ### `createAsyncStore`
 
 传入一个 `AsyncFunction`（或 key 为 AsyncFunction 的 id，value 为 `AsyncFunction` 的对象，即`Record<string, AsyncFn<any, any>>`）
-并返回一个 Async Store，用于跟踪异步状态和持久化 `Promise` 返回结果。
+并返回一个 Async Store，用于跟踪异步状态和持久化 `Promise` 的返回结果。
 
 ```ts
 const AsyncStore: Store<
@@ -219,3 +219,20 @@ const {
   }
 )
 ```
+
+#### 参数说明
+
+| 参数          | 类型                                                                                     | 描述                                                |
+| ------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| store         | <code>Store &#124; ComposedStore </code>                                                 | `createAsyncStore` 返回的 Store                     |
+| options.depFn | <code>(store: Deps<StoreValueType<T> &#124; ComposedKeyValueType<T>>) => unkown[]</code> | 当 `depFn` 的返回值发生改变才进行渲染，用于性能优化 |
+
+#### 返回值
+
+| 参数    | 类型                | 描述                                                      |
+| ------- | ------------------- | --------------------------------------------------------- |
+| data    | `StoreValueType<T>` | `Async Function` 返回的数据                               |
+| error   | `any`               | `Async Function` 捕获到的错误信息                         |
+| loading | `boolean`           | `Async Function` 的 `loading` 状态                        |
+| run     | `(param?) => void`  | 发起请求，如果没有 `param` 则默认为传入 `Provider` 的参数 |
+| refresh | `() => void`        | 使用上一次的参数重新发起请求                              |
