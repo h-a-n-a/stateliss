@@ -36,7 +36,7 @@ function useAsyncStore<T extends Store<any, any> | ComposedStore<any, any>>(
 
     if (container === EMPTY) {
       throw Error(
-        '`useAsyncStore` should be wrapped in an `AsyncStore.Provider`.'
+        "`useAsyncStore` should be wrapped in an `AsyncStore.Provider`. If you use other stores in your store, don't forget to wrap these `Provider`s."
       )
     }
 
@@ -71,7 +71,7 @@ function useAsyncStore<T extends Store<any, any> | ComposedStore<any, any>>(
         | typeof EMPTY
       if (container === EMPTY) {
         throw Error(
-          '`useAsyncStore` should be wrapped in an `AsyncStore.Provider`.'
+          "`useAsyncStore` should be wrapped in an `AsyncStore.Provider`. If you use other stores in your store, don't forget to wrap these `Provider`s."
         )
       }
       containers[storeKey] = container
