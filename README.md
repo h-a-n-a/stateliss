@@ -31,12 +31,8 @@ import { createStore } from 'unshaped'
 
 function useCounter() {
   const [count, setCount] = useState(0)
-  const increment = () => {
-    setCount(count + 1)
-  }
-  const decrement = () => {
-    setCount(count - 1)
-  }
+  const increment = () => setCount(count + 1)
+  const decrement = () => setCount(count - 1)
   return { count, increment, decrement }
 }
 
@@ -82,17 +78,13 @@ export default App
 有的时候我们希望 custom hook 能接受一个参数，你可以在这里写成一个对象，如下方 `useCounter` 所示
 
 ```tsx
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { createStore } from 'unshaped'
 
 function useCounter({ defaultValue }: { defaultValue: number }) {
   const [count, setCount] = useState(defaultValue)
-  const increment = () => {
-    setCount(count + 1)
-  }
-  const decrement = () => {
-    setCount(count - 1)
-  }
+  const increment = () => setCount(count + 1)
+  const decrement = () => setCount(count - 1)
   return { count, increment, decrement }
 }
 
@@ -113,6 +105,49 @@ function App() {
 export default App
 ```
 
+### 异步请求
+
+除了我们能在普通的自定义 Hook 中进行异步请求，`unshaped` 还提供了相应的请求处理 API：
+
+```typescript
+// api.ts
+export function getEmail({ userId }: { userId: string }): Promise<number> {
+  return fetch(`url-to-fetch-email/${userId}`).then((res) => res.text())
+}
+```
+
+```tsx
+import React from 'react'
+import { createAsyncStore, useAsyncStore } from 'unshaped'
+import { getEmail } from './api'
+
+const UserStore = createAsyncStore({
+  getEmail
+})
+
+const UserInfo = () => {
+  const { getEmail } = useAsyncStore(UserStore)
+  return (
+    <>
+      <div>Email: {getEmail.loading ? 'Loading Email...' : getEmail.data}</div>
+      <button onClick={() => getEmail.run({ userId: 'some-user-id' })}>
+        fetch Email
+      </button>
+    </>
+  )
+}
+
+const App = () => {
+  return (
+    <UserStore.Provider getEmail={{ userId: 'default-user-id' }}>
+      <UserInfo />
+    </UserStore.Provider>
+  )
+}
+
+export default App
+```
+
 ## API
 
 ### `createStore`
@@ -120,17 +155,14 @@ export default App
 传入一个 custom hook 并创建一个 Store ，但你无需关心他返回了什么，`useStore` 会帮你处理一切
 
 ```ts
-const {
-  Provider: FC<PropsWithChildren<T>>
-  Context: Context<Container<U> | typeof EMPTY>
-} = createStore<T, U>(
+const Store = createStore<T, U>(
   hook: (props: T) => U
 ): Store<T, U>
 ```
 
 ### `useStore`
 
-使用一个 Store ，并返回 custom hook 的最新结果。
+使用一个 Store ，并返回自定义 hook 的返回结果。
 
 注：该组件需要被 `Provider` 包裹
 
@@ -141,31 +173,49 @@ const state: StoreValueType<T> = useStore<T extends Store<any, any>>(
 )
 ```
 
-### `useAsyncStore`
+### `createAsyncStore`
 
-传入一个 `AsyncFunction` 并返回一个 Async Store，用于跟踪异步状态和持久化 `Promise` 返回结果
+传入一个 `AsyncFunction`（或 key 为 AsyncFunction 的 id，value 为 `AsyncFunction` 的对象，即`Record<string, AsyncFn<any, any>>`）
+并返回一个 Async Store，用于跟踪异步状态和持久化 `Promise` 返回结果。
 
 ```ts
-const {
-  Provider: FC<PropsWithChildren<T>>
-  Context: Context<Container<AsyncData<T, U>> | typeof EMPTY>
-} = createAsyncStore<T, U>(
-  asyncFn: AsyncFn<T, U>
-): Store<T, AsyncData<T, U>>
+const AsyncStore: Store<
+  AsyncFnPropsType<T>,
+  AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>
+> = createAsyncStore<T extends AsyncFn<any, any>>(
+  asyncFn: T
+)
+const AsyncStore: ComposedStore<Partial<ComposedAsyncFnPropsType<T>>, ComposedContextType<T>>
+ = createAsyncStore<T extends Record<string, AsyncFn<any, any>>>(
+  asyncFn: T
+)
 ```
 
-和 `createStore` 不同的是，它可以跟踪异步信息，如下所示：
+### `useAsyncStore`
+
+和 `useStore` 不同的是，它可以跟踪异步信息，如下所示：
 
 ```ts
 const {
-  data: StoreValueType<T>['data']
-  loading: boolean
-  isFulfilled: boolean
-  isRejected: boolean
-  refresh: () => void
-  run: (params: StorePropsType<T>) => void
-} = useStore<T extends Store<any, any>>(
+  data,
+  loading,
+  error,
+  refresh,
+  run
+} =  useAsyncStore<T extends Store<any, any>>(
   store: T,
-  depFn?: Deps<StoreValueType<T>>
+  options?: {
+    depFn?: Deps<StoreValueType<T>>
+  }
+)
+
+const {
+  asyncFn1: { data, loading, error, refresh, run },
+  asyncFn2: { data, loading, error, refresh, run }
+} = useAsyncStore<T extends ComposedStore<any, any>>(
+  store: T,
+  options?: {
+    depFn?: Deps<ComposedKeyValueType<T>>
+  }
 )
 ```

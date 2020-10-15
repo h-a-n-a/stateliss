@@ -59,6 +59,14 @@ function AsyncDemo() {
       >
         fetch all
       </button>
+      <button
+        onClick={() => {
+          getUsername.refresh()
+          getEmail.refresh()
+        }}
+      >
+        refresh all
+      </button>
     </>
   )
 }
