@@ -108,3 +108,17 @@ export function isAsyncFunctions(
 ): value is Record<string, AsyncFn<any, any>> {
   return value && typeof value === 'object'
 }
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function omit<T extends object, U extends keyof T>(
+  o: T,
+  key: U[]
+): Omit<T, U> {
+  const data = {} as Omit<T, U>
+  for (const k in o) {
+    if (!o.hasOwnProperty(k)) continue
+    if ((key as any[]).includes(k)) continue
+    ;(data as any)[k] = o[k]
+  }
+  return data
+}

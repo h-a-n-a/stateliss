@@ -4,6 +4,7 @@ import Container from './container'
 import Executor from './Executor'
 import { EMPTY } from './constants'
 import { Store } from './types'
+import { omit } from './utils'
 
 export type Hook<T, U> = (props: T) => U
 
@@ -23,7 +24,11 @@ function createStore<T, U>(hook: Hook<T, U>): Store<T, U> {
 
     return (
       <Ctx.Provider value={container}>
-        <Executor hook={hook} hookProps={props} onChange={onChange} />
+        <Executor
+          hook={hook}
+          hookProps={omit(props, ['children'])}
+          onChange={onChange}
+        />
         {hasExecutorMounted && props.children}
       </Ctx.Provider>
     )
