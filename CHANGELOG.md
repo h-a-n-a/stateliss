@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/h-a-n-a/unshaped/compare/v1.0.1...v1.0.2) (2020-10-15)
+
+### Features
+
+- polish error wordings ([63e5622](https://github.com/h-a-n-a/unshaped/commit/63e5622162d39180b45a5131a8061a9c6416154c))
+
+### Bug Fixes
+
+- fix doc ([c51ee40](https://github.com/h-a-n-a/unshaped/commit/c51ee40d764fe8ae856ca5a7d70265221e5d0713))
+- fix passing children as a prop ([c127612](https://github.com/h-a-n-a/unshaped/commit/c12761238011d99509403909f80efac54652f8d0))
+
 ### [1.0.1](https://github.com/h-a-n-a/unshaped/compare/v1.0.0...v1.0.1) (2020-10-15)
 
 ### Bug Fixes
