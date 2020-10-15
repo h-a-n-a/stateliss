@@ -4,13 +4,13 @@ import { createStore, useStore } from '../src/index'
 function useCounter() {
   const [count, setCount] = useState(0)
 
-  const increment = () => setCount(count + 1)
-  const decrement = () => setCount(count - 1)
+  const increment = () => setCount((c) => c + 1)
+  const decrement = () => setCount((c) => c - 1)
 
   return { count, increment, decrement }
 }
 
-const CounterStore = createStore(useCounter)
+export const CounterStore = createStore(useCounter)
 
 const Example = () => {
   const { count, increment, decrement } = useStore(CounterStore)

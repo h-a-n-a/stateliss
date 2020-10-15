@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
 import { render } from 'react-dom'
+
 import CustomHook from './CustomHook'
 import ComposedSideEffects from './ComposedSideEffects'
+import CombineTwoStores from './CombineTwoStores'
 
 import styles from './index.less'
 
 enum ExampleType {
   HOOKS,
-  SIDE_EFFECTS
+  SIDE_EFFECTS,
+  COMBINE_STORES
 }
 
 function App() {
@@ -32,6 +35,15 @@ function App() {
       )
     }
 
+    if (exampleType === ExampleType.COMBINE_STORES) {
+      return (
+        <>
+          <h2>Combine Stores</h2>
+          <CombineTwoStores />
+        </>
+      )
+    }
+
     return null
   }
 
@@ -44,6 +56,9 @@ function App() {
         </button>
         <button onClick={() => setExampleType(ExampleType.SIDE_EFFECTS)}>
           Side Effect
+        </button>
+        <button onClick={() => setExampleType(ExampleType.COMBINE_STORES)}>
+          Combine Stores
         </button>
       </div>
       {renderExample()}

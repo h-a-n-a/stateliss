@@ -12,7 +12,9 @@ function useStore<T extends Store<any, any>, U>(
 ) {
   const container = useContext(store.Context)
   if (container === EMPTY) {
-    throw Error('`useStore` should be wrapped in a `Store.Provider`.')
+    throw Error(
+      "`useStore` should be wrapped in a `Store.Provider`. If you use other stores in your store, don't forget to wrap these `Providers`"
+    )
   }
 
   const [state, setState] = useState<StoreValueType<T>>(container.data)
