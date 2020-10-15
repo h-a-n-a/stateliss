@@ -1,9 +1,9 @@
 {
   "name": "unshaped",
   "version": "1.0.0",
-  "main": "es/index.js",
-  "module": "lib/index.js",
-  "description": "Using react hooks and feeling shapeless",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "description": "Use react hooks and feeling shapeless",
   "license": "MIT",
   "private": false,
   "peerDependencies": {
