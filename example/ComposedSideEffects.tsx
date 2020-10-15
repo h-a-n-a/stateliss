@@ -1,6 +1,17 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Mock from 'mockjs'
 import { createAsyncStore, useAsyncStore } from '../src/index'
+
+function getWelcome({ seed }: { seed: number }): Promise<string> {
+  const welcomes = ['Yo!', 'Hey!', 'Bonjour!', 'Bonsoir!']
+  const lastOfTime = Number(String(seed)[String(seed).length - 1])
+  const index = lastOfTime % welcomes.length
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(welcomes[index])
+    }, 200)
+  })
+}
 
 function getUsername(): Promise<string> {
   return new Promise((resolve) => {
@@ -20,15 +31,20 @@ function getEmail(): Promise<number> {
 
 const AsyncStore = createAsyncStore({
   getUsername,
-  getEmail
+  getEmail,
+  getWelcome
 })
 
 function AsyncDemo() {
-  const { getUsername, getEmail } = useAsyncStore(AsyncStore)
+  const { getUsername, getEmail, getWelcome } = useAsyncStore(AsyncStore)
+
+  useEffect(() => {
+    getWelcome.run()
+  }, [])
 
   return (
     <>
-      <h4>User Info</h4>
+      <h4>{getWelcome.loading ? 'Loading welcome...' : getWelcome.data}</h4>
       <p>
         Name: {getUsername.loading ? 'Loading user name...' : getUsername.data}
       </p>
@@ -48,7 +64,7 @@ function AsyncDemo() {
 }
 
 export default () => (
-  <AsyncStore.Provider>
+  <AsyncStore.Provider getWelcome={{ seed: +new Date() }}>
     <h4>Component 1</h4>
     <AsyncDemo />
     <hr />
