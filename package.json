@@ -3,12 +3,18 @@
   "version": "1.0.2",
   "main": "lib/index.js",
   "module": "es/index.js",
-  "description": "Use react hooks and feeling shapeless",
+  "description": "Use react hooks and feel shapeless",
   "license": "MIT",
-  "private": false,
   "peerDependencies": {
     "react": "^16.8.0"
   },
+  "keywords": [
+    "state",
+    "functional",
+    "immutable",
+    "react",
+    "hook"
+  ],
   "scripts": {
     "start": "parcel ./example/index.html",
     "build": "npm run build:esm && npm run build:cjs",

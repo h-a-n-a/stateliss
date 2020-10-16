@@ -18,12 +18,7 @@ import {
   ComposedContextType,
   ComposedAsyncFnPropsType
 } from './types'
-import {
-  composeComponents,
-  isAsyncFunction,
-  isAsyncFunctions,
-  omit
-} from './utils'
+import { composeComponents, isAsyncFunction, isAsyncFunctions } from './utils'
 import AsyncExecutor, { AsyncData } from './AsyncExecutor'
 
 function createAsyncStore<T extends AsyncFn<any, any>>(
@@ -97,7 +92,7 @@ function createAsyncStore<
     type DataType = AsyncData<AsyncFnPropsType<T>, AsyncFnDataType<T>>
     const Ctx = createContext<Container<DataType> | typeof EMPTY>(EMPTY)
 
-    const Provider: FC<T> = (props) => {
+    const Provider: FC<T> = ({ children, ...params }) => {
       const containerRef = useRef(new Container<DataType>())
       const container = containerRef.current
 
@@ -112,10 +107,10 @@ function createAsyncStore<
         <Ctx.Provider value={container}>
           <AsyncExecutor
             asyncFn={asyncFn}
-            defaultAsyncParams={omit(props, ['children'])}
+            defaultAsyncParams={params}
             onChange={onChange}
           />
-          {hasExecutorMounted && props.children}
+          {hasExecutorMounted && children}
         </Ctx.Provider>
       )
     }

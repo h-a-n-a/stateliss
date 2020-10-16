@@ -4,14 +4,13 @@ import Container from './container'
 import Executor from './Executor'
 import { EMPTY } from './constants'
 import { Store } from './types'
-import { omit } from './utils'
 
 export type Hook<T, U> = (props: T) => U
 
 function createStore<T, U>(hook: Hook<T, U>): Store<T, U> {
   const Ctx = createContext<Container<U> | typeof EMPTY>(EMPTY)
 
-  const Provider: FC<T> = (props) => {
+  const Provider: FC<T> = ({ children, ...params }) => {
     const containerRef = useRef<Container<U>>(new Container<U>())
     const container = containerRef.current
 
@@ -24,12 +23,8 @@ function createStore<T, U>(hook: Hook<T, U>): Store<T, U> {
 
     return (
       <Ctx.Provider value={container}>
-        <Executor
-          hook={hook}
-          hookProps={omit(props, ['children'])}
-          onChange={onChange}
-        />
-        {hasExecutorMounted && props.children}
+        <Executor hook={hook} hookProps={params} onChange={onChange} />
+        {hasExecutorMounted && children}
       </Ctx.Provider>
     )
   }
