@@ -4,6 +4,7 @@ import Container from './container'
 import Executor from './Executor'
 import { EMPTY } from './constants'
 import { Store } from './types'
+import { isDev } from './utils'
 
 export type Hook<T, U> = (props: T) => U
 
@@ -27,6 +28,10 @@ function createStore<T, U>(hook: Hook<T, U>): Store<T, U> {
         {hasExecutorMounted && children}
       </Ctx.Provider>
     )
+  }
+
+  if (isDev) {
+    Provider.displayName = `${hook.name}.Provider`
   }
 
   return {

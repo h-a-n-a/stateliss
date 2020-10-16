@@ -18,7 +18,12 @@ import {
   ComposedContextType,
   ComposedAsyncFnPropsType
 } from './types'
-import { composeComponents, isAsyncFunction, isAsyncFunctions } from './utils'
+import {
+  composeComponents,
+  isAsyncFunction,
+  isAsyncFunctions,
+  isDev
+} from './utils'
 import AsyncExecutor, { AsyncData } from './AsyncExecutor'
 
 function createAsyncStore<T extends AsyncFn<any, any>>(
@@ -74,6 +79,10 @@ function createAsyncStore<
       return composeComponents(providers, children)
     }
 
+    if (isDev) {
+      Provider.displayName = 'UnshapedComposed.Provider'
+    }
+
     return {
       Provider,
       keyToContext: stores.reduce(
@@ -114,6 +123,11 @@ function createAsyncStore<
         </Ctx.Provider>
       )
     }
+
+    if (isDev) {
+      Provider.displayName = `${asyncFn.name}.Provider`
+    }
+
     return {
       Provider,
       Context: Ctx
