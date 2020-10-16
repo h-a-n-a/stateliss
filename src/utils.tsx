@@ -17,7 +17,6 @@ export const arePropsEqual = (
     for (const key in nextProps.hookProps) {
       const prevHookProps = prevProps.hookProps
       const nextHookProps = nextProps.hookProps
-      if (key === 'children') continue
       if (prevHookProps[key] !== nextHookProps[key]) {
         return false
       }
@@ -27,7 +26,6 @@ export const arePropsEqual = (
     for (const key in nextProps.defaultAsyncParams) {
       const prevHookProps = prevProps.defaultAsyncParams
       const nextHookProps = nextProps.defaultAsyncParams
-      if (key === 'children') continue
       if (prevHookProps[key] !== nextHookProps[key]) {
         return false
       }
@@ -122,3 +120,5 @@ export function omit<T extends object, U extends keyof T>(
   }
   return data
 }
+
+export const isDev = process.env.NODE_ENV !== 'production'
