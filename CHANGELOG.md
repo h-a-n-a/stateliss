@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3](https://github.com/h-a-n-a/stateliss/compare/v1.0.2...v1.0.3) (2021-01-08)
+
+### Features
+
+- add display name to providers ([0ab0c45](https://github.com/h-a-n-a/stateliss/commit/0ab0c45ff55a7d92ac9d67e5c0287e0c232df972))
+- simplify omit ([0a31205](https://github.com/h-a-n-a/stateliss/commit/0a31205fafe268d2bb30a00e90d2dcae36e9ddfe))
+- simplify props comparison ([1022672](https://github.com/h-a-n-a/stateliss/commit/10226727b6a44d90959b524e189677f870bc794a))
+
 ### [1.0.2](https://github.com/h-a-n-a/unshaped/compare/v1.0.1...v1.0.2) (2020-10-15)
 
 ### Features
