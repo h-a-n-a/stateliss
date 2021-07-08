@@ -16,7 +16,7 @@
 ## 安装
 
 ```bash
-npm install unshaped --save
+npm install stateliss --save
 ```
 
 ## 简易上手
@@ -27,7 +27,7 @@ npm install unshaped --save
 
 ```tsx
 import { useState } from 'react'
-import { createStore } from 'unshaped'
+import { createStore } from 'stateliss'
 
 function useCounter() {
   const [count, setCount] = useState(0)
@@ -45,7 +45,7 @@ export default createStore(useCounter)
 
 ```tsx
 import React from 'react'
-import { useStore } from 'unshaped'
+import { useStore } from 'stateliss'
 
 import CounterStore from './CounterStore'
 
@@ -79,7 +79,7 @@ export default App
 
 ```tsx
 import React, { useState } from 'react'
-import { createStore } from 'unshaped'
+import { createStore } from 'stateliss'
 
 function useCounter({ defaultValue }: { defaultValue: number }) {
   const [count, setCount] = useState(defaultValue)
@@ -107,7 +107,7 @@ export default App
 
 ### 异步请求
 
-除了我们能在普通的自定义 Hook 中进行异步请求，`unshaped` 还提供了相应的请求处理 API：
+除了我们能在普通的自定义 Hook 中进行异步请求，`stateliss` 还提供了相应的请求处理 API：
 
 ```typescript
 // api.ts
@@ -118,7 +118,7 @@ export function getEmail({ userId }: { userId: string }): Promise<number> {
 
 ```tsx
 import React from 'react'
-import { createAsyncStore, useAsyncStore } from 'unshaped'
+import { createAsyncStore, useAsyncStore } from 'stateliss'
 import { getEmail } from './api'
 
 const UserStore = createAsyncStore({
